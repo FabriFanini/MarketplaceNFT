@@ -9,7 +9,7 @@ contract fabriERC20 is ERC20, Ownable{
     constructor() ERC20("Fabri ERC20", "FE20") Ownable(msg.sender){
     }
 
-    function mintFabriERC20 (address account, uint256 value) external {
+    function mintFabriERC20 (address account, uint256 value) external onlyOwner{
         _mint(account, value);
     }
 
