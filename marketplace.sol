@@ -62,8 +62,6 @@ contract MarketplaceNFT is Ownable, ERC721Holder{
         erc20Contract.mintFabriERC20(msg.sender, rewardTokens);
 
         emit NFTPurchased (msg.sender, tokenId);
-
-
     }
 
     function setNFTPrice (uint256 _NFTPrice) external onlyOwner {
@@ -77,6 +75,4 @@ contract MarketplaceNFT is Ownable, ERC721Holder{
     function withdraw () external onlyOwner{
         payable(owner()).transfer(address(this).balance);
     }
-
-
 }
