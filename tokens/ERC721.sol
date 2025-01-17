@@ -17,4 +17,8 @@ contract fabriNFT is ERC721, Ownable{
         _safeMint(to, _tokenId);
         return _tokenId;
     }
+
+    function currentTokenId () external view returns(uint256){
+        return _tokenId;
+    }
 }

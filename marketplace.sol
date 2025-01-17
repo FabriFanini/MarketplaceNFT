@@ -20,19 +20,16 @@ contract MarketplaceNFT is Ownable, ERC721Holder{
     fabriERC20 public erc20Contract;
     fabriNFT public nftContract;
 
-    uint256 public nftPrice;
-    uint256 public rewardTokens;
+    uint256 public nftPrice = 0.01 ether;
+    uint256 public rewardTokens = 20 * 10 ** 18;
 
     //Mappings
     mapping (uint256 tokenId => bool) AvailableToken;
 
     //Constructor
-    constructor(uint256 _nftPrice, uint256 _rewardToken) Ownable(msg.sender) {
+    constructor() Ownable(msg.sender) {
         erc20Contract = new fabriERC20();
         nftContract = new fabriNFT();
-
-        nftPrice = _nftPrice;
-        rewardTokens =_rewardToken;
     }
 
     //Functions
@@ -59,6 +56,13 @@ contract MarketplaceNFT is Ownable, ERC721Holder{
 
         AvailableToken[tokenId] = false;
         nftContract.safeTransferFrom(address(this), msg.sender, tokenId);
+
+        uint256 excessAmount = msg.value - nftPrice;
+        if (excessAmount > 0){
+            (bool success, ) = msg.sender.call{value: excessAmount}("");
+            require (success, "Refund Failed");
+        }
+
         erc20Contract.mintFabriERC20(msg.sender, rewardTokens);
 
         emit NFTPurchased (msg.sender, tokenId);
@@ -75,4 +79,37 @@ contract MarketplaceNFT is Ownable, ERC721Holder{
     function withdraw () external onlyOwner{
         payable(owner()).transfer(address(this).balance);
     }
+
+    function getERC20Address () external view returns (address){
+        return address(erc20Contract);
+    }
+
+    function getNFTAddress () external view returns (address){
+        return address(nftContract);
+    }
+
+    function getAvailablesNFTs() external view returns(uint256 [] memory){
+        uint256 totalSupply = nftContract.currentTokenId();
+        uint256 count = 0;
+
+        for (uint256 i = 1; i <= totalSupply; i++){
+            if (AvailableToken[i]){
+                count = count + 1;
+            }
+        }
+
+        uint256[] memory tokendIds = new uint256[](count); 
+        uint256 index = 0;
+
+        for (uint256 i = 1; i <= totalSupply; i++){
+            if (AvailableToken[i]){
+                tokendIds[index] = i;
+                index ++;
+            }
+        }
+        
+        return tokendIds;
+    }
+
+
 }
